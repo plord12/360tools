@@ -1,6 +1,6 @@
 # 360tools
 
-Tools to help publish 360 JPEG photos
+Tools to help publish 360 degree JPEG photos
 
 ## Introduction
 
@@ -103,6 +103,9 @@ This tool has only been lightly testing on my Mac ... whilst I can build binarie
 Whilst this tool is open source, if you like it please consider buying me a beer :-)
 
 Bitcoin: `bc1qmk597c92k47uvnw2wksxu40utlazuwpkzuhdy0`
+
 Etherium: `0xf9861c776B2EC33560f5cB7D7af3cd259dFA5AB6`
+
 Tether: `0xf9861c776B2EC33560f5cB7D7af3cd259dFA5AB6`
-[![Paypal: ](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/plord12?country.x=GB&locale.x=en_GB)
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://paypal.me/plord12?country.x=GB&locale.x=en_GB)
