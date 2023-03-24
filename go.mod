@@ -2,16 +2,18 @@ module github.com/plord12/360tools
 
 go 1.17
 
+require github.com/StefanSchroeder/Golang-Ellipsoid v0.0.0-20221004092235-f00a9ab04789
+
 require (
 	cloud.google.com/go/compute v1.18.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	github.com/StefanSchroeder/Golang-Ellipsoid v0.0.0-20221004092235-f00a9ab04789
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.1 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd // indirect
+	github.com/tkrajina/gpxgo v1.2.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect

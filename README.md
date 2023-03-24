@@ -24,7 +24,7 @@ Publishing 360 degree JPEG photos ( otherwise known as Photo Spheres ) can be tr
   * Generates photo connections - the first photo links to the second, second to the third etc
   * Generates photo heading - each photo is pointed at the location of the next
   * Use [Googles StreetViewPublish API](https://developers.google.com/streetview/publish/reference/rest) to upload the metadata
-* TODO: Make use of a GPX track to obtain missing location information
+* Option to use a GPX track to obtain missing location information
 * TODO: Generate umap configurations
 
 ## Google credentials
@@ -93,6 +93,23 @@ Then pass the Place ID to the upload -
 ```
 
 The photos should now be assoicated with a Google Place.
+
+## Obtaining location data from GPX trace
+
+If the photo doesn't contain any location data the following is reported -
+
+```
+2023/03/23 20:00:19 nolocation.JPG: Unable to get metadata: exif: tag "GPSLongitude" is not present
+```
+
+However, if a [GPX track](https://en.wikipedia.org/wiki/GPS_Exchange_Format) is recorded at the same time as the photo(s) are taken
+( for example from a handheld GPS or a phone app such as [OsmAnd](https://osmand.net/)) , the timestamps can
+be compared and the location inferred -
+
+```
+360tools-darwin --placeid ChIJB2vKz_mDdkgRIKm50jzhTGk --gpx-file 2023-03-10_12-05_Fri.gpx *.JPG
+...
+```
 
 ## Testing
 
