@@ -30,6 +30,9 @@ var (
 	placeId    = flag.String("placeid", "", "place id (from --pois output) to add to upload")
 	gpxFile    = flag.String("gpx-file", "",
 		"Name of a file containing gpx track recorded at the same time as the photo was taken.")
+	mapType         = flag.String("map-type", "google", "Map type - google, for Google Street View, umap for OpenStreetMap uMap.")
+	outputDirectory = flag.String("output-dir", "umap", "Output directory for uMap files.")
+	webURL          = flag.String("web-url", "", "URL of web server that hosts photos for uMap server.")
 )
 
 func main() {
@@ -44,70 +47,20 @@ func main() {
 		os.Exit(0)
 	}
 
-	startOauth()
-
-	var photosIds []string
-
-	for _, imageFilename := range flag.Args() {
-
-		// get photo metadata
-		//
-		timestamp, lat, long, altitude, err := getMetadata(imageFilename)
-		if err != nil {
-			if len(*gpxFile) > 0 {
-				lat, long, altitude, err = getMetadataFromGPX(timestamp, *gpxFile)
-				if err != nil {
-					log.Printf("%s: Unable to get metadata from gpx: %v\n", imageFilename, err)
-					continue
-				}
-			} else {
-				log.Printf("%s: Unable to get metadata: %v\n", imageFilename, err)
-
-				continue
-			}
+	if *mapType == "google" {
+		uploadGoogleMaps()
+	} else if *mapType == "umap" {
+		if len(*webURL) == 0 {
+			log.Println("Web URL must be provided")
+			flag.PrintDefaults()
+			os.Exit(1)
 		}
-		log.Printf("%s: Timestamp %s\n", imageFilename, timestamp)
-		log.Printf("%s: Latitude %f, Longitude %f\n", imageFilename, lat, long)
-		log.Printf("%s: Altitude %f\n", imageFilename, altitude)
-
-		// get upload url
-		//
-		uploadUrl, err := getUploadUrl()
-		if err != nil {
-			log.Printf("Unable to StartUpload: %v\n", err)
-			continue
-		}
-
-		// upload file
-		//
-		uploadFile(imageFilename, uploadUrl)
-		if err != nil {
-			log.Printf("Unable to upload file: %v\n", err)
-			continue
-		}
-		log.Printf("%s: Uploaded\n", imageFilename)
-
-		// create meta data
-		//
-		photoId, err := createPhoto(uploadUrl, lat, long, altitude, timestamp, *placeId)
-		if err != nil {
-			log.Printf("Unable to Upload metadata: %v\n", err)
-			continue
-		}
-		log.Printf("%s: Created metadata with id %s\n", imageFilename, photoId)
-
-		photosIds = append(photosIds, photoId)
+		createUmapFiles()
+	} else {
+		log.Println("Invalid map type - must be one of google or umap")
+		flag.PrintDefaults()
+		os.Exit(1)
 	}
-
-	// wait for index complete
-	//
-	for _, photoId := range photosIds {
-		waitPhotoUploaded(photoId)
-	}
-
-	// fix metadata by adding connections and bearings
-	//
-	addConnections(photosIds)
 }
 
 func openURL(url string) {

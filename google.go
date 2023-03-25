@@ -9,6 +9,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"hash/fnv"
 	"io"
@@ -31,6 +32,79 @@ import (
 
 var svc *streetviewpublish.Service
 var client *http.Client
+
+func uploadGoogleMaps() {
+	startOauth()
+
+	var photosIds []string
+
+	for _, imageFilename := range flag.Args() {
+
+		// only support 360 images
+		//
+		if !is360(imageFilename) {
+			log.Printf("%s: Donesn't seem to be a 360 picture, skipping picture", imageFilename)
+			continue
+		}
+
+		// get photo metadata
+		//
+		timestamp, lat, long, altitude, err := getMetadata(imageFilename)
+		if err != nil {
+			if len(*gpxFile) > 0 {
+				lat, long, altitude, err = getMetadataFromGPX(timestamp, *gpxFile)
+				if err != nil {
+					log.Printf("%s: Unable to get metadata from gpx: %v, skipping picture\n", imageFilename, err)
+					continue
+				}
+			} else {
+				log.Printf("%s: Unable to get metadata: %v, skipping picture\n", imageFilename, err)
+				continue
+			}
+		}
+		log.Printf("%s: Timestamp %s\n", imageFilename, timestamp)
+		log.Printf("%s: Latitude %f, Longitude %f\n", imageFilename, lat, long)
+		log.Printf("%s: Altitude %f\n", imageFilename, altitude)
+
+		// get upload url
+		//
+		uploadUrl, err := getUploadUrl()
+		if err != nil {
+			log.Printf("Unable to StartUpload: %v, skipping picture\n", err)
+			continue
+		}
+
+		// upload file
+		//
+		uploadFile(imageFilename, uploadUrl)
+		if err != nil {
+			log.Printf("Unable to upload file: %v, skipping picture\n", err)
+			continue
+		}
+		log.Printf("%s: Uploaded\n", imageFilename)
+
+		// create meta data
+		//
+		photoId, err := createPhoto(uploadUrl, lat, long, altitude, timestamp, *placeId)
+		if err != nil {
+			log.Printf("Unable to Upload metadata: %v, skipping metadata\n", err)
+			continue
+		}
+		log.Printf("%s: Created metadata with id %s\n", imageFilename, photoId)
+
+		photosIds = append(photosIds, photoId)
+	}
+
+	// wait for index complete
+	//
+	for _, photoId := range photosIds {
+		waitPhotoUploaded(photoId)
+	}
+
+	// fix metadata by adding connections and bearings
+	//
+	addConnections(photosIds)
+}
 
 func startOauth() {
 	config := &oauth2.Config{

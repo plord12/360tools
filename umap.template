@@ -1,0 +1,97 @@
+{
+  "type": "umap",
+  "uri": "https://umap.openstreetmap.fr/en/map/photos",
+  "properties": {
+    "easing": true,
+    "tilelayersControl": true,
+    "measureControl": true,
+    "embedControl": true,
+    "fullscreenControl": true,
+    "searchControl": true,
+    "datalayersControl": true,
+    "zoomControl": true,
+    "slideshow": {},
+    "captionBar": false,
+    "limitBounds": {
+      "east": {{ .East }},
+      "west": {{ .West }},
+      "north": {{ .North }},
+      "south": {{ .South }}
+    },
+    "tilelayer": {
+      "tms": false,
+      "name": "OpenStreetMap",
+      "maxZoom": 19,
+      "minZoom": 0,
+      "attribution": "Map data ©  [[http://osm.org/copyright|OpenStreetMap contributors]]",
+      "url_template": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    },
+    "licence": "",
+    "description": "",
+    "name": "Generated from 360tools",
+    "onLoadPanel": "caption",
+    "displayPopupFooter": false,
+    "miniMap": true,
+    "moreControl": true,
+    "scaleControl": true,
+    "scrollWheelZoom": true,
+    "zoom": 15
+  },
+  "layers": [
+    {
+      "type": "FeatureCollection",
+      "features": [],
+      "_umap_options": {
+        "displayOnLoad": true,
+        "browsable": true,
+        "name": "360Photos",
+        "remoteData": {
+          "url": "{{ .WebURL }}/photos360.csv",
+          "format": "csv",
+          "dynamic": true,
+          "proxy": true
+        },
+        "iconClass": "Ball",
+        "popupShape": "Large",
+        "popupContentTemplate": "{{`{{{`}}{{ .WebURL }}/{photo}.html}}}\n[[{{ .WebURL }}/{photo}.html|Open in new tab]]",
+        "color": "DarkOrange",
+        "description": "",
+        "id": 2700881
+      }
+    },
+    {
+      "type": "FeatureCollection",
+      "features": [],
+      "_umap_options": {
+        "displayOnLoad": true,
+        "browsable": true,
+        "name": "Tracks",
+        "id": 2700882,
+        "remoteData": {},
+        "color": "Red",
+        "weight": "6",
+        "labelKey": "description",
+        "showLabel": true
+      }
+    },
+    {
+      "type": "FeatureCollection",
+      "features": [],
+      "_umap_options": {
+        "displayOnLoad": true,
+        "browsable": true,
+        "remoteData": {
+          "url": "{{ .WebURL }}/photos.csv",
+          "format": "csv",
+          "dynamic": true,
+          "proxy": true
+        },
+        "name": "Photos",
+        "iconClass": "Ball",
+        "popupShape": "Large",
+        "popupContentTemplate": "{{`{{`}}{{ .WebURL }}/{photo}}}\n[[{{ .WebURL }}/{photo}|Open in new tab]]",
+        "id": 2700884
+      }
+    }
+  ]
+}

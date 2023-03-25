@@ -25,7 +25,7 @@ Publishing 360 degree JPEG photos ( otherwise known as Photo Spheres ) can be tr
   * Generates photo heading - each photo is pointed at the location of the next
   * Use [Googles StreetViewPublish API](https://developers.google.com/streetview/publish/reference/rest) to upload the metadata
 * Option to use a GPX track to obtain missing location information
-* TODO: Generate umap configurations
+* Generate [uMap](https://umap.openstreetmap.fr/en/) files ( requires hosting photos on a web server )
 
 ## Google credentials
 
@@ -73,6 +73,9 @@ Note that it can take a bit of time to appear.
 
 However the photos will not be associated with any Google Place.
 
+![Google maps](images/googlemaps1.png)
+![Google maps](images/googlemaps2.png)
+
 ## Uploading photos to Google Maps and add to a Google Place
 
 First run the tool to get a list of nearby places -
@@ -93,6 +96,33 @@ Then pass the Place ID to the upload -
 ```
 
 The photos should now be assoicated with a Google Place.
+
+## Generating uMap configurations
+
+Run the tool with the Umap options -
+
+```
+360tools-darwin --map-type umap --web-url https://plord.co.uk/360test *.JPG
+2023/03/25 09:02:57 uMap files have been generated in umap directory
+2023/03/25 09:02:57 To use in uMap :
+2023/03/25 09:02:57 1. Copy photos, html pages and csv files to https://plord.co.uk/360test
+2023/03/25 09:02:57 2. On uMap server, click "Create a map"
+2023/03/25 09:02:57 3. Click "Edit map settings" ( cog wheel ), "Advanced actions" then "Empty"
+2023/03/25 09:02:57 4. Click "Import data" ( up arrow ), browse and upload photos.umap then "Import"
+2023/03/25 09:02:57 5. Click "Save" and "Disable editing"
+```
+
+The umap directory now contains -
+
+* Copy of photos
+* html wrapper for each photo
+* csv file for 360 photos
+* csv file for non-360 photos
+* uMap configuration file
+
+The output of the tool gives instructions what to do with these files.
+
+![uMap](images/umap.png)
 
 ## Obtaining location data from GPX trace
 
