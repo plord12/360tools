@@ -18,11 +18,13 @@ type PhotoData struct {
 }
 
 type UmapData struct {
-	WebURL string
-	East   float64
-	West   float64
-	North  float64
-	South  float64
+	WebURL     string
+	East       float64
+	West       float64
+	North      float64
+	South      float64
+	CenterLat  float64
+	CenterLong float64
 }
 
 //go:embed photo360-html.template
@@ -68,6 +70,10 @@ func createUmapFiles() {
 	north := -90.0
 	south := 90.0
 
+	totalLat := 0.0
+	totalLong := 0.0
+	totalCount := 0
+
 	for _, imageFilename := range flag.Args() {
 
 		timestamp, lat, long, _, err := getMetadata(imageFilename)
@@ -96,6 +102,10 @@ func createUmapFiles() {
 		if lat < south {
 			south = lat
 		}
+
+		totalLat = totalLat + lat
+		totalLong = totalLong + long
+		totalCount = totalCount + 1
 
 		if is360(imageFilename) {
 
@@ -154,7 +164,7 @@ func createUmapFiles() {
 
 	// umap file
 	//
-	td := UmapData{WebURL: *webURL, East: east, West: west, North: north, South: south}
+	td := UmapData{WebURL: *webURL, East: east, West: west, North: north, South: south, CenterLat: totalLat / float64(totalCount), CenterLong: totalLong / float64(totalCount)}
 	t, err := template.New("umap").Parse(umapTemplate)
 	if err != nil {
 		if err != nil {

@@ -11,13 +11,7 @@
     "datalayersControl": true,
     "zoomControl": true,
     "slideshow": {},
-    "captionBar": false,
-    "limitBounds": {
-      "east": {{ .East }},
-      "west": {{ .West }},
-      "north": {{ .North }},
-      "south": {{ .South }}
-    },
+    "captionBar": true,
     "tilelayer": {
       "tms": false,
       "name": "OpenStreetMap",
@@ -29,13 +23,20 @@
     "licence": "",
     "description": "",
     "name": "Generated from 360tools",
-    "onLoadPanel": "caption",
-    "displayPopupFooter": false,
+    "onLoadPanel": "none",
+    "displayPopupFooter": true,
     "miniMap": true,
     "moreControl": true,
     "scaleControl": true,
     "scrollWheelZoom": true,
-    "zoom": 15
+    "zoom": 18
+  },
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      {{ .CenterLong }},
+      {{ .CenterLat }}
+    ]
   },
   "layers": [
     {
@@ -56,7 +57,8 @@
         "popupContentTemplate": "{{`{{{`}}{{ .WebURL }}/{photo}.html}}}\n[[{{ .WebURL }}/{photo}.html|Open in new tab]]",
         "color": "DarkOrange",
         "description": "",
-        "id": 2700881
+        "id": 2700881,
+        "labelKey": "photo"
       }
     },
     {
@@ -90,7 +92,8 @@
         "iconClass": "Ball",
         "popupShape": "Large",
         "popupContentTemplate": "{{`{{`}}{{ .WebURL }}/{photo}}}\n[[{{ .WebURL }}/{photo}|Open in new tab]]",
-        "id": 2700884
+        "id": 2700884,
+        "labelKey": "photo"
       }
     }
   ]

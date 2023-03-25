@@ -141,6 +141,13 @@ be compared and the location inferred -
 ...
 ```
 
+Alternatively, you can use `exiftool` to update the photos from GPX -
+
+```
+exiftool -geotag ../2023-03-10_12-05_Fri.gpx *JPG
+   15 image files updated
+```
+
 ## Testing
 
 This tool has only been lightly testing on my Mac ... whilst I can build binaries for other platforms, I don't have an easy way to test these.
