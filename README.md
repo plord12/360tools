@@ -122,6 +122,12 @@ The umap directory now contains -
 
 The output of the tool gives instructions what to do with these files.
 
+Tracks can also be specified - these are combined into a single `tracks.gpx` file that should also be placed on the web server -
+
+```
+360tools-darwin --map-type umap --web-url https://plord.co.uk/360test *.JPG *.gpx
+```
+
 ![uMap](images/umap.png)
 
 ## Obtaining location data from GPX trace

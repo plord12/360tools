@@ -67,3 +67,36 @@ func getMetadataFromGPX(timestamp time.Time, gpxFilename string) (float64, float
 	//
 	return 0.0, 0.0, 0.0, errors.New("Timestamp " + timestamp.String() + " not found in GPX")
 }
+
+func mergeGPX(gpxFilenames []string, gpxOutputFilename string) error {
+
+	outputGpxFile := new(gpx.GPX)
+
+	for _, gpxFilename := range gpxFilenames {
+		gpxBytes, err := os.ReadFile(gpxFilename)
+		if err != nil {
+			return err
+		}
+
+		gpxFile, err := gpx.ParseBytes(gpxBytes)
+		if err != nil {
+			return err
+		}
+
+		outputGpxFile.Tracks = append(outputGpxFile.Tracks, gpxFile.Tracks...)
+	}
+
+	output, err := os.Create(gpxOutputFilename)
+	if err != nil {
+		return err
+	}
+	defer output.Close()
+
+	xmlBytes, err := outputGpxFile.ToXml(gpx.ToXmlParams{Version: "1.1", Indent: true})
+	if err != nil {
+		return err
+	}
+	output.Write(xmlBytes)
+
+	return nil
+}

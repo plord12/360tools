@@ -49,8 +49,9 @@
         "remoteData": {
           "url": "{{ .WebURL }}/photos360.csv",
           "format": "csv",
-          "dynamic": true,
-          "proxy": true
+          "dynamic": {{ .Has360Photos }},
+          "proxy": true,
+          "ttl": "3600"
         },
         "iconClass": "Ball",
         "popupShape": "Large",
@@ -58,7 +59,8 @@
         "color": "DarkOrange",
         "description": "",
         "id": 2700881,
-        "labelKey": "photo"
+        "labelKey": "photo",
+        "showLabel": null
       }
     },
     {
@@ -69,11 +71,17 @@
         "browsable": true,
         "name": "Tracks",
         "id": 2700882,
-        "remoteData": {},
+        "remoteData": {
+          "url": "{{ .WebURL }}/tracks.gpx",
+          "format": "gpx",
+          "dynamic": {{ .HasTracks }},
+          "proxy": true,
+          "ttl": "3600"
+        },
         "color": "Red",
         "weight": "6",
-        "labelKey": "description",
-        "showLabel": true
+        "labelKey": "name",
+        "showLabel": null
       }
     },
     {
@@ -85,15 +93,17 @@
         "remoteData": {
           "url": "{{ .WebURL }}/photos.csv",
           "format": "csv",
-          "dynamic": true,
-          "proxy": true
+          "dynamic": {{ .HasPhotos }},
+          "proxy": true,
+          "ttl": "3600"
         },
         "name": "Photos",
         "iconClass": "Ball",
         "popupShape": "Large",
         "popupContentTemplate": "{{`{{`}}{{ .WebURL }}/{photo}}}\n[[{{ .WebURL }}/{photo}|Open in new tab]]",
         "id": 2700884,
-        "labelKey": "photo"
+        "labelKey": "photo",
+        "showLabel": null
       }
     }
   ]

@@ -1,5 +1,8 @@
 // umap functions
 //
+// FIX THIS - add support for tracks
+//
+//	Combine all *.gpx > tracks.gx ( multiple <trk> tags )
 
 package main
 
@@ -10,6 +13,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"text/template"
 )
 
@@ -18,13 +22,16 @@ type PhotoData struct {
 }
 
 type UmapData struct {
-	WebURL     string
-	East       float64
-	West       float64
-	North      float64
-	South      float64
-	CenterLat  float64
-	CenterLong float64
+	WebURL       string
+	East         float64
+	West         float64
+	North        float64
+	South        float64
+	CenterLat    float64
+	CenterLong   float64
+	Has360Photos bool
+	HasPhotos    bool
+	HasTracks    bool
 }
 
 //go:embed photo360-html.template
@@ -57,7 +64,7 @@ func createUmapFiles() {
 	defer csvPlain.Close()
 	csvPlain.WriteString("photo,lat,lon\n")
 
-	csv360, err := os.Create(path.Join(*outputDirectory, "/photos360.csv"))
+	csv360, err := os.Create(path.Join(*outputDirectory, "photos360.csv"))
 	if err != nil {
 		log.Printf("Unable to create output file - %v", err)
 		os.Exit(1)
@@ -74,97 +81,126 @@ func createUmapFiles() {
 	totalLong := 0.0
 	totalCount := 0
 
+	has360Photos := false
+	hasPhotos := false
+	hasTracks := false
+
+	var gpxFiles []string
+
 	for _, imageFilename := range flag.Args() {
 
-		timestamp, lat, long, _, err := getMetadata(imageFilename)
-		if err != nil {
-			if len(*gpxFile) > 0 {
-				lat, long, _, err = getMetadataFromGPX(timestamp, *gpxFile)
-				if err != nil {
-					log.Printf("%s: Unable to get metadata from gpx: %v, skipping picture\n", imageFilename, err)
+		if filepath.Ext(imageFilename) == ".gpx" {
+			// gpx file
+
+			gpxFiles = append(gpxFiles, imageFilename)
+
+			hasTracks = true
+		} else {
+			// assume picture
+
+			timestamp, lat, long, _, err := getMetadata(imageFilename)
+			if err != nil {
+				if len(*gpxFile) > 0 {
+					lat, long, _, err = getMetadataFromGPX(timestamp, *gpxFile)
+					if err != nil {
+						log.Printf("%s: Unable to get metadata from gpx: %v, skipping picture\n", imageFilename, err)
+						continue
+					}
+				} else {
+					log.Printf("%s: Unable to get metadata: %v, skipping picture\n", imageFilename, err)
 					continue
 				}
+			}
+
+			if long > east {
+				east = long
+			}
+			if long < west {
+				west = long
+			}
+			if lat > north {
+				north = lat
+			}
+			if lat < south {
+				south = lat
+			}
+
+			totalLat = totalLat + lat
+			totalLong = totalLong + long
+			totalCount = totalCount + 1
+
+			if is360(imageFilename) {
+
+				has360Photos = true
+
+				// update 360 csv
+				//
+				csv360.WriteString(fmt.Sprintf("%s,%f,%f\n", path.Base(imageFilename), lat, long))
+
+				// write 360 phto html
+				//
+				td := PhotoData{Photo: path.Base(imageFilename)}
+				t, err := template.New("umap").Parse(photo360htmlTemplate)
+				if err != nil {
+					if err != nil {
+						log.Printf("%s: Unable to get photo360-html.template: %v, skipping picture\n", imageFilename, err)
+						continue
+					}
+				}
+				html, err := os.Create(path.Join(*outputDirectory, path.Base(imageFilename)+".html"))
+				if err != nil {
+					log.Printf("Unable to create output file - %v", err)
+					os.Exit(1)
+				}
+				defer html.Close()
+				err = t.Execute(html, td)
+				if err != nil {
+					if err != nil {
+						log.Printf("%s: Unable to process photo360-html.template: %v, skipping picture\n", imageFilename, err)
+						continue
+					}
+				}
+
 			} else {
-				log.Printf("%s: Unable to get metadata: %v, skipping picture\n", imageFilename, err)
+
+				hasPhotos = true
+
+				// update plain csv
+				//
+				csvPlain.WriteString(fmt.Sprintf("%s,%f,%f\n", path.Base(imageFilename), lat, long))
+
+			}
+
+			// copy photo
+			//
+			r, err := os.Open(imageFilename)
+			if err != nil {
+				log.Printf("%s: Unable to copy photo: %v\n", imageFilename, err)
 				continue
 			}
-		}
-
-		if long > east {
-			east = long
-		}
-		if long < west {
-			west = long
-		}
-		if lat > north {
-			north = lat
-		}
-		if lat < south {
-			south = lat
-		}
-
-		totalLat = totalLat + lat
-		totalLong = totalLong + long
-		totalCount = totalCount + 1
-
-		if is360(imageFilename) {
-
-			// update 360 csv
-			//
-			csv360.WriteString(fmt.Sprintf("%s,%f,%f\n", path.Base(imageFilename), lat, long))
-
-			// write 360 phto html
-			//
-			td := PhotoData{Photo: path.Base(imageFilename)}
-			t, err := template.New("umap").Parse(photo360htmlTemplate)
+			defer r.Close()
+			w, err := os.Create(path.Join(*outputDirectory, path.Base(imageFilename)))
 			if err != nil {
-				if err != nil {
-					log.Printf("%s: Unable to get photo360-html.template: %v, skipping picture\n", imageFilename, err)
-					continue
-				}
+				log.Printf("%s: Unable to copy photo: %v\n", imageFilename, err)
+				continue
 			}
-			html, err := os.Create(path.Join(*outputDirectory, path.Base(imageFilename)+".html"))
-			if err != nil {
-				log.Printf("Unable to create output file - %v", err)
-				os.Exit(1)
-			}
-			defer html.Close()
-			err = t.Execute(html, td)
-			if err != nil {
-				if err != nil {
-					log.Printf("%s: Unable to process photo360-html.template: %v, skipping picture\n", imageFilename, err)
-					continue
-				}
-			}
-
-		} else {
-
-			// update plain csv
-			//
-			csvPlain.WriteString(fmt.Sprintf("%s,%f,%f\n", path.Base(imageFilename), lat, long))
-
+			defer w.Close()
+			w.ReadFrom(r)
 		}
-
-		// copy photo
-		//
-		r, err := os.Open(imageFilename)
-		if err != nil {
-			log.Printf("%s: Unable to copy photo: %v\n", imageFilename, err)
-			continue
-		}
-		defer r.Close()
-		w, err := os.Create(path.Join(*outputDirectory, path.Base(imageFilename)))
-		if err != nil {
-			log.Printf("%s: Unable to copy photo: %v\n", imageFilename, err)
-			continue
-		}
-		defer w.Close()
-		w.ReadFrom(r)
 	}
 
 	// umap file
 	//
-	td := UmapData{WebURL: *webURL, East: east, West: west, North: north, South: south, CenterLat: totalLat / float64(totalCount), CenterLong: totalLong / float64(totalCount)}
+	td := UmapData{WebURL: *webURL,
+		East:         east,
+		West:         west,
+		North:        north,
+		South:        south,
+		CenterLat:    totalLat / float64(totalCount),
+		CenterLong:   totalLong / float64(totalCount),
+		Has360Photos: has360Photos,
+		HasPhotos:    hasPhotos,
+		HasTracks:    hasTracks}
 	t, err := template.New("umap").Parse(umapTemplate)
 	if err != nil {
 		if err != nil {
@@ -184,6 +220,14 @@ func createUmapFiles() {
 			log.Printf("Unable to process umap.template: %v\n", err)
 			os.Exit(1)
 		}
+	}
+
+	// gpx files
+	//
+	err = mergeGPX(gpxFiles, path.Join(*outputDirectory, "tracks.gpx"))
+	if err != nil {
+		log.Printf("Unable to create tracks.gpx file - %v", err)
+		os.Exit(1)
 	}
 
 	log.Printf("uMap files have been generated in %s directory\n", *outputDirectory)
