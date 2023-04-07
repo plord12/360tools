@@ -10,6 +10,7 @@
     "searchControl": true,
     "datalayersControl": true,
     "zoomControl": true,
+    "shortCredit": "Generated from 360tools - see https://github.com/plord12/360tools",
     "slideshow": {},
     "captionBar": true,
     "tilelayer": {
@@ -22,7 +23,7 @@
     },
     "licence": "",
     "description": "",
-    "name": "Generated from 360tools",
+    "name": "{{ .Name }}",
     "onLoadPanel": "none",
     "displayPopupFooter": true,
     "miniMap": true,

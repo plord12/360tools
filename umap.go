@@ -22,6 +22,7 @@ type PhotoData struct {
 }
 
 type UmapData struct {
+	Name         string
 	WebURL       string
 	East         float64
 	West         float64
@@ -99,7 +100,7 @@ func createUmapFiles() {
 			// assume picture
 
 			timestamp, lat, long, _, err := getMetadata(imageFilename)
-			if err != nil {
+			if err != nil || lat != lat || long != long {
 				if len(*gpxFile) > 0 {
 					lat, long, _, err = getMetadataFromGPX(timestamp, *gpxFile)
 					if err != nil {
@@ -191,7 +192,8 @@ func createUmapFiles() {
 
 	// umap file
 	//
-	td := UmapData{WebURL: *webURL,
+	td := UmapData{Name: path.Base(*webURL),
+		WebURL:       *webURL,
 		East:         east,
 		West:         west,
 		North:        north,
