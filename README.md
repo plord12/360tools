@@ -144,7 +144,7 @@ However, if a [GPX track](https://en.wikipedia.org/wiki/GPS_Exchange_Format) is 
 be compared and the location inferred -
 
 ```
-360tools-darwin --placeid ChIJB2vKz_mDdkgRIKm50jzhTGk --gpx-file 2023-03-10_12-05_Fri.gpx *.JPG
+360tools-darwin --placeid ChIJB2vKz_mDdkgRIKm50jzhTGk 2023-03-10_12-05_Fri.gpx *.JPG
 ...
 ```
 

@@ -82,7 +82,7 @@
         "color": "Red",
         "weight": "6",
         "labelKey": "name",
-        "showLabel": null
+        "showLabel": true
       }
     },
     {

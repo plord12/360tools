@@ -88,21 +88,29 @@ func createUmapFiles() {
 
 	var gpxFiles []string
 
+	// process gpx files first
+	//
+	for _, imageFilename := range flag.Args() {
+		if filepath.Ext(imageFilename) == ".gpx" {
+			gpxFiles = append(gpxFiles, imageFilename)
+			hasTracks = true
+		}
+	}
+	err = mergeGPX(gpxFiles, path.Join(*outputDirectory, "tracks.gpx"))
+	if err != nil {
+		log.Printf("Unable to create tracks.gpx file - %v", err)
+		os.Exit(1)
+	}
+
+	// process jpgs
 	for _, imageFilename := range flag.Args() {
 
-		if filepath.Ext(imageFilename) == ".gpx" {
-			// gpx file
-
-			gpxFiles = append(gpxFiles, imageFilename)
-
-			hasTracks = true
-		} else {
-			// assume picture
+		if filepath.Ext(imageFilename) == ".jpg" || filepath.Ext(imageFilename) == ".JPG" {
 
 			timestamp, lat, long, _, err := getMetadata(imageFilename)
 			if err != nil || lat != lat || long != long {
-				if len(*gpxFile) > 0 {
-					lat, long, _, err = getMetadataFromGPX(timestamp, *gpxFile)
+				if hasTracks {
+					lat, long, _, err = getMetadataFromGPX(timestamp, path.Join(*outputDirectory, "tracks.gpx"))
 					if err != nil {
 						log.Printf("%s: Unable to get metadata from gpx: %v, skipping picture\n", imageFilename, err)
 						continue
@@ -222,14 +230,6 @@ func createUmapFiles() {
 			log.Printf("Unable to process umap.template: %v\n", err)
 			os.Exit(1)
 		}
-	}
-
-	// gpx files
-	//
-	err = mergeGPX(gpxFiles, path.Join(*outputDirectory, "tracks.gpx"))
-	if err != nil {
-		log.Printf("Unable to create tracks.gpx file - %v", err)
-		os.Exit(1)
 	}
 
 	log.Printf("uMap files have been generated in %s directory\n", *outputDirectory)

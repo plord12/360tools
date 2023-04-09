@@ -25,11 +25,9 @@ var (
 	apikey     = flag.String("apikey", "", "API key.  If non-empty, overrides --apikey_file")
 	apiKeyFile = flag.String("apikey-file", "apikey.dat",
 		"Name of a file containing just the project's API key from https://developers.google.com/console.")
-	cacheToken = flag.Bool("cachetoken", true, "cache the OAuth 2.0 token")
-	pois       = flag.Bool("pois", false, "only list the nearest points of interest - requires api token")
-	placeId    = flag.String("placeid", "", "place id (from --pois output) to add to upload")
-	gpxFile    = flag.String("gpx-file", "",
-		"Name of a file containing gpx track recorded at the same time as the photo was taken.")
+	cacheToken      = flag.Bool("cachetoken", true, "cache the OAuth 2.0 token")
+	pois            = flag.Bool("pois", false, "only list the nearest points of interest - requires api token")
+	placeId         = flag.String("placeid", "", "place id (from --pois output) to add to upload")
 	mapType         = flag.String("map-type", "google", "Map type - google, for Google Street View, umap for OpenStreetMap uMap.")
 	outputDirectory = flag.String("output-dir", "umap", "Output directory for uMap files.")
 	webURL          = flag.String("web-url", "", "URL of web server that hosts photos for uMap server.")

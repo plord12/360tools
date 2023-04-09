@@ -19,6 +19,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -37,62 +38,81 @@ func uploadGoogleMaps() {
 	startOauth()
 
 	var photosIds []string
+	var gpxFiles []string
+	hasTracks := false
+
+	// process gpx files first
+	//
+	for _, imageFilename := range flag.Args() {
+		if filepath.Ext(imageFilename) == ".gpx" {
+			gpxFiles = append(gpxFiles, imageFilename)
+			hasTracks = true
+		}
+	}
+	err := mergeGPX(gpxFiles, path.Join(*outputDirectory, "tracks.gpx"))
+	if err != nil {
+		log.Printf("Unable to create tracks.gpx file - %v", err)
+		os.Exit(1)
+	}
 
 	for _, imageFilename := range flag.Args() {
 
-		// only support 360 images
-		//
-		if !is360(imageFilename) {
-			log.Printf("%s: Donesn't seem to be a 360 picture, skipping picture", imageFilename)
-			continue
-		}
+		if filepath.Ext(imageFilename) == ".jpg" || filepath.Ext(imageFilename) == ".JPG" {
 
-		// get photo metadata
-		//
-		timestamp, lat, long, altitude, err := getMetadata(imageFilename)
-		if err != nil {
-			if len(*gpxFile) > 0 {
-				lat, long, altitude, err = getMetadataFromGPX(timestamp, *gpxFile)
-				if err != nil {
-					log.Printf("%s: Unable to get metadata from gpx: %v, skipping picture\n", imageFilename, err)
-					continue
-				}
-			} else {
-				log.Printf("%s: Unable to get metadata: %v, skipping picture\n", imageFilename, err)
+			// only support 360 images
+			//
+			if !is360(imageFilename) {
+				log.Printf("%s: Donesn't seem to be a 360 picture, skipping picture", imageFilename)
 				continue
 			}
-		}
-		log.Printf("%s: Timestamp %s\n", imageFilename, timestamp)
-		log.Printf("%s: Latitude %f, Longitude %f\n", imageFilename, lat, long)
-		log.Printf("%s: Altitude %f\n", imageFilename, altitude)
 
-		// get upload url
-		//
-		uploadUrl, err := getUploadUrl()
-		if err != nil {
-			log.Printf("Unable to StartUpload: %v, skipping picture\n", err)
-			continue
-		}
+			// get photo metadata
+			//
+			timestamp, lat, long, altitude, err := getMetadata(imageFilename)
+			if err != nil {
+				if hasTracks {
+					lat, long, altitude, err = getMetadataFromGPX(timestamp, path.Join(*outputDirectory, "tracks.gpx"))
+					if err != nil {
+						log.Printf("%s: Unable to get metadata from gpx: %v, skipping picture\n", imageFilename, err)
+						continue
+					}
+				} else {
+					log.Printf("%s: Unable to get metadata: %v, skipping picture\n", imageFilename, err)
+					continue
+				}
+			}
+			log.Printf("%s: Timestamp %s\n", imageFilename, timestamp)
+			log.Printf("%s: Latitude %f, Longitude %f\n", imageFilename, lat, long)
+			log.Printf("%s: Altitude %f\n", imageFilename, altitude)
 
-		// upload file
-		//
-		uploadFile(imageFilename, uploadUrl)
-		if err != nil {
-			log.Printf("Unable to upload file: %v, skipping picture\n", err)
-			continue
-		}
-		log.Printf("%s: Uploaded\n", imageFilename)
+			// get upload url
+			//
+			uploadUrl, err := getUploadUrl()
+			if err != nil {
+				log.Printf("Unable to StartUpload: %v, skipping picture\n", err)
+				continue
+			}
 
-		// create meta data
-		//
-		photoId, err := createPhoto(uploadUrl, lat, long, altitude, timestamp, *placeId)
-		if err != nil {
-			log.Printf("Unable to Upload metadata: %v, skipping metadata\n", err)
-			continue
-		}
-		log.Printf("%s: Created metadata with id %s\n", imageFilename, photoId)
+			// upload file
+			//
+			uploadFile(imageFilename, uploadUrl)
+			if err != nil {
+				log.Printf("Unable to upload file: %v, skipping picture\n", err)
+				continue
+			}
+			log.Printf("%s: Uploaded\n", imageFilename)
 
-		photosIds = append(photosIds, photoId)
+			// create meta data
+			//
+			photoId, err := createPhoto(uploadUrl, lat, long, altitude, timestamp, *placeId)
+			if err != nil {
+				log.Printf("Unable to Upload metadata: %v, skipping metadata\n", err)
+				continue
+			}
+			log.Printf("%s: Created metadata with id %s\n", imageFilename, photoId)
+
+			photosIds = append(photosIds, photoId)
+		}
 	}
 
 	// wait for index complete
