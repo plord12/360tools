@@ -19,7 +19,6 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -49,7 +48,12 @@ func uploadGoogleMaps() {
 			hasTracks = true
 		}
 	}
-	err := mergeGPX(gpxFiles, path.Join(*outputDirectory, "tracks.gpx"))
+	file, err := os.CreateTemp("", "tracks.*.gpx")
+	if err != nil {
+		log.Printf("Unable to create tracks.gpx file - %v", err)
+		os.Exit(1)
+	}
+	err = mergeGPX(gpxFiles, file.Name())
 	if err != nil {
 		log.Printf("Unable to create tracks.gpx file - %v", err)
 		os.Exit(1)
@@ -69,9 +73,9 @@ func uploadGoogleMaps() {
 			// get photo metadata
 			//
 			timestamp, lat, long, altitude, err := getMetadata(imageFilename)
-			if err != nil {
+			if err != nil || lat != lat || long != long {
 				if hasTracks {
-					lat, long, altitude, err = getMetadataFromGPX(timestamp, path.Join(*outputDirectory, "tracks.gpx"))
+					lat, long, altitude, err = getMetadataFromGPX(timestamp, file.Name())
 					if err != nil {
 						log.Printf("%s: Unable to get metadata from gpx: %v, skipping picture\n", imageFilename, err)
 						continue
@@ -123,7 +127,9 @@ func uploadGoogleMaps() {
 
 	// fix metadata by adding connections and bearings
 	//
-	addConnections(photosIds)
+	if !*skipConnections {
+		addConnections(photosIds)
+	}
 }
 
 func startOauth() {
