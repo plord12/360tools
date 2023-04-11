@@ -369,7 +369,7 @@ func newOAuthClient(cacheToken *bool, ctx context.Context, config *oauth2.Config
 			token = tokenFromWeb(ctx, config)
 			saveToken(cacheFile, token)
 		} else {
-			log.Printf("Using cached token %#v from %q", token, cacheFile)
+			log.Printf("Using cached token")
 		}
 	}
 
