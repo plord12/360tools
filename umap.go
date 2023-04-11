@@ -8,7 +8,6 @@ package main
 
 import (
 	_ "embed"
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -41,34 +40,30 @@ var photo360htmlTemplate string
 //go:embed umap.template
 var umapTemplate string
 
-func createUmapFiles() {
+func createUmapFiles(outputDirectory *string, webURL *string, filenames []string) error {
 
 	_, err := os.Stat(*outputDirectory)
 	if !os.IsNotExist(err) {
-		log.Printf("Output directory %s already exists, refusing to overwrite\n", *outputDirectory)
-		os.Exit(1)
+		return fmt.Errorf("output directory %s already exists, refusing to overwrite", *outputDirectory)
 	}
 
 	err = os.Mkdir(*outputDirectory, 0755)
 	if err != nil {
-		log.Printf("Unable to create output directory - %v", err)
-		os.Exit(1)
+		return fmt.Errorf("unable to create output directory - %v", err)
 	}
 
 	// csv files for 360 and non-360 images
 	//
 	csvPlain, err := os.Create(path.Join(*outputDirectory, "photos.csv"))
 	if err != nil {
-		log.Printf("Unable to create output file - %v", err)
-		os.Exit(1)
+		return fmt.Errorf("unable to create output file - %v", err)
 	}
 	defer csvPlain.Close()
 	csvPlain.WriteString("photo,lat,lon\n")
 
 	csv360, err := os.Create(path.Join(*outputDirectory, "photos360.csv"))
 	if err != nil {
-		log.Printf("Unable to create output file - %v", err)
-		os.Exit(1)
+		return fmt.Errorf("unable to create output file - %v", err)
 	}
 	defer csv360.Close()
 	csv360.WriteString("photo,lat,lon\n")
@@ -90,7 +85,7 @@ func createUmapFiles() {
 
 	// process gpx files first
 	//
-	for _, imageFilename := range flag.Args() {
+	for _, imageFilename := range filenames {
 		if filepath.Ext(imageFilename) == ".gpx" {
 			gpxFiles = append(gpxFiles, imageFilename)
 			hasTracks = true
@@ -98,12 +93,11 @@ func createUmapFiles() {
 	}
 	err = mergeGPX(gpxFiles, path.Join(*outputDirectory, "tracks.gpx"))
 	if err != nil {
-		log.Printf("Unable to create tracks.gpx file - %v", err)
-		os.Exit(1)
+		return fmt.Errorf("unable to create tracks.gpx file - %v", err)
 	}
 
 	// process jpgs
-	for _, imageFilename := range flag.Args() {
+	for _, imageFilename := range filenames {
 
 		if filepath.Ext(imageFilename) == ".jpg" || filepath.Ext(imageFilename) == ".JPG" {
 
@@ -158,8 +152,7 @@ func createUmapFiles() {
 				}
 				html, err := os.Create(path.Join(*outputDirectory, path.Base(imageFilename)+".html"))
 				if err != nil {
-					log.Printf("Unable to create output file - %v", err)
-					os.Exit(1)
+					return fmt.Errorf("unable to create output file - %v", err)
 				}
 				defer html.Close()
 				err = t.Execute(html, td)
@@ -214,21 +207,18 @@ func createUmapFiles() {
 	t, err := template.New("umap").Parse(umapTemplate)
 	if err != nil {
 		if err != nil {
-			log.Printf("Unable to get umap.template: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("unable to get umap.template: %v", err)
 		}
 	}
 	umap, err := os.Create(path.Join(*outputDirectory, "photos.umap"))
 	if err != nil {
-		log.Printf("Unable to create output file - %v", err)
-		os.Exit(1)
+		return fmt.Errorf("unable to create output file - %v", err)
 	}
 	defer umap.Close()
 	err = t.Execute(umap, td)
 	if err != nil {
 		if err != nil {
-			log.Printf("Unable to process umap.template: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("unable to process umap.template: %v", err)
 		}
 	}
 
@@ -239,4 +229,6 @@ func createUmapFiles() {
 	log.Printf("3. Click \"Edit map settings\" ( cog wheel ), \"Advanced actions\" then \"Empty\"\n")
 	log.Printf("4. Click \"Import data\" ( up arrow ), browse and upload photos.umap then \"Import\"\n")
 	log.Printf("5. Click \"Save\" and \"Disable editing\"\n")
+
+	return nil
 }

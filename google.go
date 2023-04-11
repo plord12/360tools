@@ -9,7 +9,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"hash/fnv"
 	"io"
@@ -33,8 +32,8 @@ import (
 var svc *streetviewpublish.Service
 var client *http.Client
 
-func uploadGoogleMaps() {
-	startOauth()
+func uploadGoogleMaps(clientID *string, clientIDFile *string, secret *string, secretFile *string, apikey *string, apiKeyFile *string, cacheToken *bool, skipConnections *bool, placeId *string, filenames []string) {
+	startOauth(clientID, clientIDFile, secret, secretFile, cacheToken)
 
 	var photosIds []string
 	var gpxFiles []string
@@ -42,7 +41,7 @@ func uploadGoogleMaps() {
 
 	// process gpx files first
 	//
-	for _, imageFilename := range flag.Args() {
+	for _, imageFilename := range filenames {
 		if filepath.Ext(imageFilename) == ".gpx" {
 			gpxFiles = append(gpxFiles, imageFilename)
 			hasTracks = true
@@ -60,7 +59,7 @@ func uploadGoogleMaps() {
 		os.Exit(1)
 	}
 
-	for _, imageFilename := range flag.Args() {
+	for _, imageFilename := range filenames {
 
 		if filepath.Ext(imageFilename) == ".jpg" || filepath.Ext(imageFilename) == ".JPG" {
 
@@ -133,7 +132,7 @@ func uploadGoogleMaps() {
 	}
 }
 
-func startOauth() {
+func startOauth(clientID *string, clientIDFile *string, secret *string, secretFile *string, cacheToken *bool) {
 	config := &oauth2.Config{
 		ClientID:     valueOrFileContents(*clientID, *clientIDFile),
 		ClientSecret: valueOrFileContents(*secret, *secretFile),
@@ -142,7 +141,7 @@ func startOauth() {
 	}
 
 	ctx := context.Background()
-	client = newOAuthClient(ctx, config)
+	client = newOAuthClient(cacheToken, ctx, config)
 	var err error
 	svc, err = streetviewpublish.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
@@ -199,7 +198,7 @@ type response struct {
 	Results []result `json:"results"`
 }
 
-func listPois(imageFilenames []string) {
+func listPois(apikey *string, apiKeyFile *string, imageFilenames []string) {
 
 	client := &http.Client{}
 
@@ -335,7 +334,7 @@ func tokenCacheFile(config *oauth2.Config) string {
 	return filepath.Join(osUserCacheDir(), url.QueryEscape(fn))
 }
 
-func tokenFromFile(file string) (*oauth2.Token, error) {
+func tokenFromFile(cacheToken *bool, file string) (*oauth2.Token, error) {
 	if !*cacheToken {
 		return nil, errors.New("--cachetoken is false")
 	}
@@ -358,9 +357,9 @@ func saveToken(file string, token *oauth2.Token) {
 	gob.NewEncoder(f).Encode(token)
 }
 
-func newOAuthClient(ctx context.Context, config *oauth2.Config) *http.Client {
+func newOAuthClient(cacheToken *bool, ctx context.Context, config *oauth2.Config) *http.Client {
 	cacheFile := tokenCacheFile(config)
-	token, err := tokenFromFile(cacheFile)
+	token, err := tokenFromFile(cacheToken, cacheFile)
 	if err != nil {
 		token = tokenFromWeb(ctx, config)
 		saveToken(cacheFile, token)

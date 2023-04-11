@@ -34,7 +34,7 @@ func getMetadata(file string) (time.Time, float64, float64, float64, error) {
 	altitude := float64(metadata.GPS.Altitude())
 
 	if lat == 0.0 && long == 0.0 && altitude == 0 {
-		return time.Time{}, 0.0, 0.0, 0.0, errors.New("no GPS data")
+		return timestamp, 0.0, 0.0, 0.0, errors.New("no GPS data")
 	}
 
 	return timestamp, lat, long, altitude, nil
