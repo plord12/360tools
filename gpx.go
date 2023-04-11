@@ -33,15 +33,8 @@ func getMetadataFromGPX(timestamp time.Time, gpxFilename string) (float64, float
 				if (timestamp.Equal(lastPoint.Timestamp) || timestamp.After(lastPoint.Timestamp)) &&
 					(timestamp.Equal(point.Timestamp) || timestamp.Before(point.Timestamp)) {
 
-					// same point so no need to interpolate
+					// two points in the same place could result in / 0 , but can't happen
 					//
-					if point.Timestamp.Unix() == lastPoint.Timestamp.Unix() {
-						alt := 0.0
-						if lastPoint.Elevation.NotNull() {
-							alt = lastPoint.Elevation.Value()
-						}
-						return lastPoint.Latitude, lastPoint.Longitude, alt, nil
-					}
 
 					// get distance between the points
 					//
@@ -94,6 +87,7 @@ func mergeGPX(gpxFilenames []string, gpxOutputFilename string) error {
 
 	xmlBytes, err := outputGpxFile.ToXml(gpx.ToXmlParams{Version: "1.1", Indent: true})
 	if err != nil {
+		// not sure how this can fail
 		return err
 	}
 	output.Write(xmlBytes)

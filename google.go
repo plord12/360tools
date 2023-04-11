@@ -53,6 +53,7 @@ func uploadGoogleMaps() {
 		log.Printf("Unable to create tracks.gpx file - %v", err)
 		os.Exit(1)
 	}
+	defer os.Remove(file.Name())
 	err = mergeGPX(gpxFiles, file.Name())
 	if err != nil {
 		log.Printf("Unable to create tracks.gpx file - %v", err)

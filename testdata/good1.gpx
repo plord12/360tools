@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpxtrkx="http://www.garmin.com/xmlschemas/TrackStatsExtension/v1" xmlns:wptx1="http://www.garmin.com/xmlschemas/WaypointExtension/v1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" creator="Montana 650" version="1.1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackStatsExtension/v1 http://www8.garmin.com/xmlschemas/TrackStatsExtension.xsd http://www.garmin.com/xmlschemas/WaypointExtension/v1 http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd">
+  <trk>
+    <name>good1</name>
+    <trkseg>
+      <trkpt lat="50" lon="-2">
+        <ele>139.05</ele>
+        <time>2022-10-22T08:00:00Z</time>
+      </trkpt>
+      <trkpt lat="51" lon="-3">
+        <ele>139.05</ele>
+        <time>2022-10-22T08:10:00Z</time>
+      </trkpt>
+      <trkpt lat="51" lon="-3">
+        <ele>139.05</ele>
+        <time>2022-10-22T08:10:00Z</time>
+      </trkpt>
+      <trkpt lat="52" lon="-4">
+        <ele>139.05</ele>
+        <time>2022-10-22T08:20:00Z</time>
+      </trkpt>
+      <trkpt lat="53" lon="-5">
+        <ele>139.05</ele>
+        <time>2022-10-22T08:30:00Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>
