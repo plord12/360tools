@@ -101,7 +101,7 @@ func createUmapFiles(outputDirectory *string, webURL *string, filenames []string
 
 		if filepath.Ext(imageFilename) == ".jpg" || filepath.Ext(imageFilename) == ".JPG" {
 
-			timestamp, lat, long, _, err := getMetadata(imageFilename)
+			timestamp, lat, long, altitude, err := getMetadata(imageFilename)
 			if err != nil || lat != lat || long != long {
 				if hasTracks {
 					lat, long, _, err = getMetadataFromGPX(timestamp, path.Join(*outputDirectory, "tracks.gpx"))
@@ -114,6 +114,10 @@ func createUmapFiles(outputDirectory *string, webURL *string, filenames []string
 					continue
 				}
 			}
+
+			log.Printf("%s: Timestamp %s\n", imageFilename, timestamp)
+			log.Printf("%s: Latitude %f, Longitude %f\n", imageFilename, lat, long)
+			log.Printf("%s: Altitude %f\n", imageFilename, altitude)
 
 			if long > east {
 				east = long

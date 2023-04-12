@@ -31,6 +31,7 @@ import (
 
 var svc *streetviewpublish.Service
 var client *http.Client
+var testServer string
 
 func uploadGoogleMaps(clientID *string, clientIDFile *string, secret *string, secretFile *string, apikey *string, apiKeyFile *string, cacheToken *bool, skipConnections *bool, placeId *string, filenames []string) {
 	startOauth(clientID, clientIDFile, secret, secretFile, cacheToken)
@@ -133,6 +134,16 @@ func uploadGoogleMaps(clientID *string, clientIDFile *string, secret *string, se
 }
 
 func startOauth(clientID *string, clientIDFile *string, secret *string, secretFile *string, cacheToken *bool) {
+	if testServer != "" {
+		ctx := context.Background()
+		var err error
+		svc, err = streetviewpublish.NewService(ctx, option.WithEndpoint(testServer+"/streetviewpublish"), option.WithoutAuthentication())
+		if err != nil {
+			log.Fatalf("Unable to create test StreetViewPublish service: %v", err)
+		}
+		client = &http.Client{}
+		return
+	}
 	config := &oauth2.Config{
 		ClientID:     valueOrFileContents(*clientID, *clientIDFile),
 		ClientSecret: valueOrFileContents(*secret, *secretFile),
@@ -154,6 +165,7 @@ func getUploadUrl() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return uploadRef.UploadUrl, nil
 }
 
@@ -365,7 +377,6 @@ func newOAuthClient(cacheToken *bool, ctx context.Context, config *oauth2.Config
 		saveToken(cacheFile, token)
 	} else {
 		if token.Expiry.Before(time.Now()) {
-			log.Printf("need to renew new access token")
 			token = tokenFromWeb(ctx, config)
 			saveToken(cacheFile, token)
 		} else {
