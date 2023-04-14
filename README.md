@@ -159,7 +159,7 @@ exiftool -geotag ../2023-03-10_12-05_Fri.gpx *JPG
 
 This tool has only been lightly testing on my Mac ... whilst I can build binaries for other platforms, I don't have an easy way to test these.
 
-![example workflow](https://github.com/plord12/360tools/actions/workflows/build-actions.yml/badge.svg)
+![example workflow](https://github.com/plord12/360tools/actions/workflows/build-actions.yaml/badge.svg)
 
 ## Beer
 
