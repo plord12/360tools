@@ -22,7 +22,7 @@ ${BINDIR}/${NAME}-darwin-arm64: ${SOURCES}
 	GOARCH=arm64 GOOS=darwin go build -o $@ 
 
 ${BINDIR}/${NAME}-darwin: ${BINDIR}/${NAME}-darwin-amd64 ${BINDIR}/${NAME}-darwin-arm64
-	makefat $@ $^
+	-makefat $@ $^
 
 ${BINDIR}/${NAME}-linux-amd64: ${SOURCES}
 	GOARCH=amd64 GOOS=linux go build -o $@ 
