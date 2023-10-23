@@ -44,6 +44,10 @@ type data struct {
 	Data string `xml:",chardata"`
 }
 
+type panoData struct {
+	Data string `xml:"ProjectionType,attr"`
+}
+
 // FIX THIS - is there a better way ?
 var equirectangular bool
 
@@ -53,12 +57,6 @@ func is360(file string) bool {
 
 	// read xmp data to check if this is a 360 image
 	//
-
-	jpg, err := os.Open(file)
-	if err != nil {
-		return false
-	}
-	defer jpg.Close()
 
 	reader := func(r io.Reader) error {
 		d := xml.NewDecoder(r)
@@ -73,7 +71,8 @@ func is360(file string) bool {
 			case xml.StartElement:
 				if ty.Name.Local == "ProjectionType" {
 					var projectionType data
-					if err = d.DecodeElement(&projectionType, &ty); err != nil {
+					err = d.DecodeElement(&projectionType, &ty)
+					if err != nil {
 						return err
 					}
 					if projectionType.Data == "equirectangular" {
@@ -85,7 +84,47 @@ func is360(file string) bool {
 		return nil
 	}
 
+	panoReader := func(r io.Reader) error {
+		println("pano start")
+		d := xml.NewDecoder(r)
+		for {
+			tok, err := d.Token()
+			if tok == nil || err == io.EOF {
+				break
+			} else if err != nil {
+				return err
+			}
+			switch ty := tok.(type) {
+			case xml.StartElement:
+				if ty.Name.Local == "Description" {
+					var projectionType panoData
+					err = d.DecodeElement(&projectionType, &ty)
+					if err != nil {
+						println("pano Description error " + err.Error())
+						return err
+					}
+					if projectionType.Data == "equirectangular" {
+						equirectangular = true
+					}
+				}
+			}
+		}
+		return nil
+	}
+
+	jpg, err := os.Open(file)
+	if err != nil {
+		return false
+	}
 	jpeg.ScanJPEG(jpg, nil, reader)
+	jpg.Close()
+
+	jpg, err = os.Open(file)
+	if err != nil {
+		return false
+	}
+	jpeg.ScanJPEG(jpg, nil, panoReader)
+	jpg.Close()
 
 	return equirectangular
 }

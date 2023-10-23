@@ -67,7 +67,7 @@ func uploadGoogleMaps(clientID *string, clientIDFile *string, secret *string, se
 			// only support 360 images
 			//
 			if !is360(imageFilename) {
-				log.Printf("%s: Donesn't seem to be a 360 picture, skipping picture", imageFilename)
+				log.Printf("%s: Doesn't seem to be a 360 picture, skipping picture", imageFilename)
 				continue
 			}
 

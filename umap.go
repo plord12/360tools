@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"text/template"
@@ -175,9 +176,17 @@ func createUmapFiles(outputDirectory *string, webURL *string, filenames []string
 				//
 				csvPlain.WriteString(fmt.Sprintf("%s,%f,%f\n", path.Base(imageFilename), lat, long))
 
+				// create thumbnail
+				//
+				thumb := path.Join(*outputDirectory, path.Base(imageFilename)+"-thumb.jpg")
+				err := exec.Command("convert", imageFilename, "-resize", "450", thumb).Run()
+				if err != nil {
+					log.Printf("%s: Unable to create thumbnail: %v, skipping picture\n", imageFilename, err)
+					continue
+				}
 			}
 
-			// copy photo
+			// copy original photo
 			//
 			r, err := os.Open(imageFilename)
 			if err != nil {
@@ -192,6 +201,7 @@ func createUmapFiles(outputDirectory *string, webURL *string, filenames []string
 			}
 			defer w.Close()
 			w.ReadFrom(r)
+
 		}
 	}
 

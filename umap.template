@@ -56,7 +56,7 @@
         },
         "iconClass": "Ball",
         "popupShape": "Large",
-        "popupContentTemplate": "{{`{{{`}}{{ .WebURL }}/{photo}.html}}}\n[[{{ .WebURL }}/{photo}.html|Open in new tab]]",
+        "popupContentTemplate": "# [[{{ .WebURL }}/{photo}.html|Open in new tab]]\n{{`{{{`}}{{ .WebURL }}/{photo}.html}}}",
         "color": "DarkOrange",
         "description": "",
         "id": 2700881,
@@ -101,7 +101,7 @@
         "name": "Photos",
         "iconClass": "Ball",
         "popupShape": "Large",
-        "popupContentTemplate": "{{`{{`}}{{ .WebURL }}/{photo}}}\n[[{{ .WebURL }}/{photo}|Open in new tab]]",
+        "popupContentTemplate": "# [[{{ .WebURL }}/{photo}|Open in new tab]]\n{{`{{`}}{{ .WebURL }}/{photo}-thumb.jpg}}",
         "id": 2700884,
         "labelKey": "photo",
         "showLabel": null
